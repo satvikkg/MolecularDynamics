@@ -9,7 +9,7 @@
 ## Initial setup
 # Prepare the complex in schrodinger and export both preotein and ligand as pdb files. Remove the CONNECT lines only in the ligand.pdb file
 
-conda activate md
+#conda activate md
 
 ## Preparing protein and ligand
 #initial setup
@@ -19,6 +19,10 @@ echo "Enter the net charge of ligand: "
 read charge
 echo "Enter time to simulate in ns: "
 read nstime
+pstime=$(($nstime*1000))
+intertime=$(($pstime*1000))
+steps=$(($intertime/2))
+echo $steps
 
 # preparing protein
 gmx pdb2gmx -f protein.pdb -ff oplsaa -water spc -o protein.gro -ignh
@@ -73,10 +77,10 @@ sed -i "2 s/.*/ $totalatoms/" complex.gro
 # Modifying .mdp files
 #echo Enter the ligand ID:
 #read ligname
+sed -i "s/ligname/$ligname/g" nvt.mdp
+sed -i "s/ligname/$ligname/g" npt.mdp
 sed -i "s/ligname/$ligname/g" md.mdp
-sed -i "s/ligname/$ligname/g" md.mdp
-sed -i "s/ligname/$ligname/g" md.mdp
-sed -i "s/simulationtime/$nstime/g" md.mdp
+sed -i "s/simulationtime/$steps/g" md.mdp
 
 head -n -1 complex.gro > tmp-complex.gro
 grep $ligname ligand.gro >> tmp-complex.gro
@@ -118,4 +122,3 @@ wait
 gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p complex.top -n index.ndx -o md-run-1.tpr
 wait
 gmx mdrun -deffnm md-run-1 -nb gpu
-
