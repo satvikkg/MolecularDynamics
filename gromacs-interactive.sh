@@ -9,13 +9,16 @@
 ## Initial setup
 # Prepare the complex in schrodinger and export both preotein and ligand as pdb files. Remove the CONNECT lines only in the ligand.pdb file
 
-## Preparing protein
+## Preparing protein and ligand
 #initial setup
 echo Enter the ligand ID:
 read ligname
 echo "Enter the net charge of ligand: "
 read charge
+echo "Enter time to simulate in ns: "
+read nstime
 
+# preparing protein
 gmx pdb2gmx -f protein.pdb -ff oplsaa -water spc -o protein.gro -ignh
 wait
 echo PROTEIN CONVERSION COMPLETE SUCCESSFULLY
@@ -29,6 +32,9 @@ wait
 ## Preparing ligand parametric files
 #echo "Enter the net charge of ligand: "
 #read charge
+grep  HETATM ligand.pdb > ligand-intermediate.pdb
+rm ligand.pdb
+mv ligand-intermediate.pdb ligand.pdb
 
 antechamber -i ligand.pdb -fi pdb -o ligand.mol2 -fo mol2 -c bcc -nc $charge
 wait
@@ -68,6 +74,7 @@ sed -i "2 s/.*/ $totalatoms/" complex.gro
 sed -i "s/ligname/$ligname/g" md.mdp
 sed -i "s/ligname/$ligname/g" md.mdp
 sed -i "s/ligname/$ligname/g" md.mdp
+sed -i "s/simulationtime/$nstime/g" md.mdp
 
 head -n -1 complex.gro > tmp-complex.gro
 grep $ligname ligand.gro >> tmp-complex.gro
