@@ -87,7 +87,26 @@ wait
 echo SOL | gmx genion -s ions.tpr -o solv_ions.gro -p complex.top -pname NA -nname CL -neutral
 wait
 
-gmx make_ndx -f solv_ions.gro -o index.ndx <<EOF
+gmx grompp -f em.mdp -c solv_ions.gro -p complex.top -o em.tpr
+wait
+gmx mdrun -v -deffnm em -nb gpu
+
+gmx make_ndx -f em.gro -o index.ndx <<EOF
 1 | 13
 q
 EOF
+
+gmx grompp -f nvt.mdp -c em.gro -r em.gro -p complex.top -n index.ndx -o nvt.tpr
+wait
+gmx mdrun -deffnm nvt -nb gpu
+wait
+
+gmx grompp -f npt.mdp -c nvt.gro -t nvt.cpt -r nvt.gro -p complex.top -n index.ndx -o npt.tpr
+wait
+gmx mdrun -deffnm npt -nb gpu
+wait
+
+gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p complex.top -n index.ndx -o md-run-1.tpr
+wait
+gmx mdrun -deffnm md-run-1 -nb gpu
+
