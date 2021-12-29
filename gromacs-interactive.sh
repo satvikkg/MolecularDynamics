@@ -9,6 +9,8 @@
 ## Initial setup
 # Prepare the complex in schrodinger and export both preotein and ligand as pdb files. Remove the CONNECT lines only in the ligand.pdb file
 
+conda activate md
+
 ## Preparing protein and ligand
 #initial setup
 echo Enter the ligand ID:
