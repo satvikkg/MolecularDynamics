@@ -1,15 +1,13 @@
 ## Interactive script for gromacs system generation
 
 ## Requirements
-# MAESTRO for protein and ligand preperation
-# GROMACS for simulation
-# AMBER for generating ligand parametric files
-# ACPYPE for ligand parameter generation
+#Please install the acpype and ambertools before running script.
+# MAESTRO for protein and ligand preperation.
+# GROMACS for simulation.
+# AMBER and ACPYPE for generating ligand and protein parametric files.
 
 ## Initial setup
 # Prepare the complex in schrodinger and export both preotein and ligand as pdb files. Remove the CONNECT lines only in the ligand.pdb file
-
-#conda activate md
 
 ## Preparing protein and ligand
 #initial setup
@@ -100,25 +98,26 @@ wait
 echo SOL | gmx genion -s ions.tpr -o solv_ions.gro -p complex.top -pname NA -nname CL -neutral
 wait
 
+## Simulation
+# Stage: EM
 gmx grompp -f em.mdp -c solv_ions.gro -p complex.top -o em.tpr
 wait
 gmx mdrun -v -deffnm em -nb gpu -gpu_id 0
-
 gmx make_ndx -f em.gro -o index.ndx <<EOF
 1 | 13
 q
 EOF
-
+# Stage: NVT
 gmx grompp -f nvt.mdp -c em.gro -r em.gro -p complex.top -n index.ndx -o nvt.tpr
 wait
 gmx mdrun -v -deffnm nvt -nb gpu -gpu_id 0
 wait
-
+# Stage: NPT
 gmx grompp -f npt.mdp -c nvt.gro -t nvt.cpt -r nvt.gro -p complex.top -n index.ndx -o npt.tpr
 wait
 gmx mdrun -v -deffnm npt -nb gpu -gpu_id 0
 wait
-
+# Stage: Production MD
 gmx grompp -f md.mdp -c npt.gro -t npt.cpt -p complex.top -n index.ndx -o md-run-1.tpr
 wait
 gmx mdrun -v -deffnm md-run-1 -nb gpu -gpu_id 0
