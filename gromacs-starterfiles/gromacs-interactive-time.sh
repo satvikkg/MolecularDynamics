@@ -1,13 +1,38 @@
-## Interactive script for gromacs system generation
-
-## Requirements
-#Please install the acpype and ambertools before running script.
-# MAESTRO for protein and ligand preperation.
-# GROMACS for simulation.
-# AMBER and ACPYPE for generating ligand and protein parametric files.
-
-## Initial setup
-# Prepare the complex in schrodinger and export both preotein and ligand as pdb files. Remove the CONNECT lines only in the ligand.pdb file
+###############################################################################
+#                   GROMACS SYSTEM GENERATION – INTERACTIVE SCRIPT            #
+###############################################################################
+#
+# Author: Satvik Kotha
+# Version: 2.0
+# Citation: 
+#
+# Requirements:
+#   • MAESTRO (Schrödinger) – for protein and ligand preparation
+#   • GROMACS – for MD simulation (install GPU version; requires NVIDIA drivers
+#     and CUDA toolkit)
+#   • AMBERTOOLS + ACPYPE – for generating ligand/protein parameter files
+#
+# Notes:
+#   • Install AMBERTOOLS and ACPYPE inside a dedicated conda environment
+#   • Do NOT install GROMACS inside the conda environment
+#
+# Recommended Conda Environment Setup:
+#   1. conda create -n md python=3.9
+#   2. conda activate md
+#   3. conda install -c conda-forge ambertools
+#   4. pip install acpype
+#
+# Initial Preparation and Running:
+#   • Prepare the protein–ligand complex in Maestro
+#   • Export the protein and ligand separately as PDB files
+#   • Remove all CONNECT lines from the ligand PDB file (protein PDB is unchanged)
+#   • Note the charge of the ligand and the ligandname 
+#     The ligandname is a 3-letter word in the ligand.pdb file eg LIG or UNK
+#   • Place the ligand.pdb and protein.pdb in the same folder as the script 
+#     and mdp files
+#   • Run this script using sh gromacs-interactive-time.sh
+#
+###############################################################################
 
 ## Preparing protein and ligand
 #initial setup
@@ -23,10 +48,9 @@ steps=$(($intertime/2))
 echo $steps
 
 # preparing protein
-gmx pdb2gmx -f protein.pdb -ff oplsaa -water spc -o protein.gro -ignh
+gmx pdb2gmx -f protein.pdb -ff amber99sb-ildn -water spc -o protein.gro -ignh
 wait
 echo PROTEIN CONVERSION COMPLETE SUCCESSFULLY
-# -f is the input protein file in pdb format -ff is the forcefield -water is the water model -o is the output after conversion -ignh ignores the hydrogens atom coordinate files
 
 ## Making copies of topology file and gro file for complex generation
 cp topol.top complex.top
